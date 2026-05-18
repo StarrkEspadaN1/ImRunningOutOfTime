@@ -1,0 +1,180 @@
+using System;
+using System.Linq;
+
+namespace MediaLibrary
+{
+    class Program
+    {
+        static Library<Media> library = new Library<Media>();
+
+        static void Main(string[] args)
+        {
+            bool running = true;
+            while (running)
+            {
+                Console.WriteLine("\n=== Media Library ===");
+                Console.WriteLine("1. Add item");
+                Console.WriteLine("2. Remove item");
+                Console.WriteLine("3. Find by title");
+                Console.WriteLine("4. Filter by year");
+                Console.WriteLine("5. Show all available");
+                Console.WriteLine("6. Lend item");
+                Console.WriteLine("7. Return item");
+                Console.WriteLine("8. Print all items");
+                Console.WriteLine("9. Export to CSV");
+                Console.WriteLine("10. Advanced LINQ queries");
+                Console.WriteLine("0. Exit");
+                Console.Write("Choice: ");
+                string input = Console.ReadLine();
+
+                try
+                {
+                    switch (input)
+                    {
+                        case "1": AddItem(); break;
+                        case "2": RemoveItem(); break;
+                        case "3": FindByTitle(); break;
+                        case "4": FilterByYear(); break;
+                        case "5": ShowAvailable(); break;
+                        case "6": LendItem(); break;
+                        case "7": ReturnItem(); break;
+                        case "8": library.PrintAll(); break;
+                        case "9": ExportToCsv(); break;
+                        case "10": AdvancedQueries(); break;
+                        case "0": running = false; break;
+                        default: Console.WriteLine("Invalid option."); break;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Error: {ex.Message}");
+                }
+            }
+        }
+
+        static void AddItem()
+        {
+            Console.Write("Enter type (book/movie/album): ");
+            string type = Console.ReadLine().ToLower();
+
+            Console.Write("Title: ");
+            string title = Console.ReadLine();
+            Console.Write("Author/Director/Artist: ");
+            string creator = Console.ReadLine();
+            Console.Write("Year published: ");
+            int year = int.Parse(Console.ReadLine());
+
+            Media item;
+            switch (type)
+            {
+                case "book":
+                    Console.Write("Pages: ");
+                    int pages = int.Parse(Console.ReadLine());
+                    Console.Write("Genre: ");
+                    string genre = Console.ReadLine();
+                    item = new Book(title, creator, year, pages, genre);
+                    break;
+                case "movie":
+                    Console.Write("Duration (minutes): ");
+                    int duration = int.Parse(Console.ReadLine());
+                    item = new Movie(title, creator, year, duration);
+                    break;
+                case "album":
+                    Console.Write("Tracks count: ");
+                    int tracks = int.Parse(Console.ReadLine());
+                    item = new MusicAlbum(title, creator, year, tracks);
+                    break;
+                default:
+                    Console.WriteLine("Unknown type.");
+                    return;
+            }
+            library.Add(item);
+            Console.WriteLine("Item added successfully.");
+        }
+
+        static void RemoveItem()
+        {
+            Console.Write("Enter title to remove: ");
+            string title = Console.ReadLine();
+            library.Remove(title);
+            Console.WriteLine("Removed.");
+        }
+
+        static void FindByTitle()
+        {
+            Console.Write("Enter title: ");
+            string title = Console.ReadLine();
+            var item = library.FindByTitle(title);
+            Console.WriteLine("Found: " + item);
+        }
+
+        static void FilterByYear()
+        {
+            Console.Write("Enter year: ");
+            int year = int.Parse(Console.ReadLine());
+            var results = library.FilterByYear(year);
+            Console.WriteLine($"Items from {year}:");
+            foreach (var m in results)
+                Console.WriteLine(m);
+        }
+
+        static void ShowAvailable()
+        {
+            var available = library.GetAllAvailable();
+            Console.WriteLine("Available items:");
+            foreach (var m in available)
+                Console.WriteLine(m);
+        }
+
+        static void LendItem()
+        {
+            Console.Write("Enter title to lend: ");
+            string title = Console.ReadLine();
+            library.Lend(title);
+            Console.WriteLine("Item lent.");
+        }
+
+        static void ReturnItem()
+        {
+            Console.Write("Enter title to return: ");
+            string title = Console.ReadLine();
+            library.Return(title);
+            Console.WriteLine("Item returned.");
+        }
+
+        static void ExportToCsv()
+        {
+            Console.Write("Enter file path (e.g., media.csv): ");
+            string path = Console.ReadLine();
+            library.ExportToCsv(path);
+            Console.WriteLine($"Exported to {path}");
+        }
+
+        static void AdvancedQueries()
+        {
+            Console.WriteLine("1. Books after year");
+            Console.WriteLine("2. Movies sorted by duration");
+            Console.WriteLine("3. Unavailable items");
+            Console.Write("Choice: ");
+            string c = Console.ReadLine();
+            switch (c)
+            {
+                case "1":
+                    Console.Write("Year: ");
+                    int y = int.Parse(Console.ReadLine());
+                    var books = library.GetBooksAfterYear(y);
+                    foreach (var b in books) Console.WriteLine(b);
+                    break;
+                case "2":
+                    var movies = library.GetMoviesSortedByDuration();
+                    foreach (var m in movies) Console.WriteLine(m);
+                    break;
+                case "3":
+                    var unavail = library.GetUnavailableItems();
+                    foreach (var i in unavail) Console.WriteLine(i);
+                    break;
+                default: Console.WriteLine("Invalid choice."); break;
+            }
+        }
+    }
+}
