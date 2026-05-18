@@ -1,0 +1,4 @@
+namespace MediaLibrary
+{
+    public class MusicAlbumLibrary : Library<MusicAlbum> { }
+}
