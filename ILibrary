@@ -1,0 +1,99 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.IO;
+
+namespace MediaLibrary
+{
+    public class Library<T> : IMediaManager<T> where T : Media
+    {
+        private List<T> _items = new List<T>();
+        private Dictionary<string, T> _titleIndex = new Dictionary<string, T>();
+
+        public void Add(T item)
+        {
+            if (_titleIndex.ContainsKey(item.Title))
+                throw new MediaAlreadyExistsException($"Item with title '{item.Title}' already exists.");
+
+            _items.Add(item);
+            _titleIndex.Add(item.Title, item);
+        }
+
+        public bool Remove(string title)
+        {
+            if (!_titleIndex.ContainsKey(title))
+                throw new MediaNotFoundException($"Item with title '{title}' not found.");
+
+            T item = _titleIndex[title];
+            _items.Remove(item);
+            _titleIndex.Remove(title);
+            return true;
+        }
+
+        public T FindByTitle(string title)
+        {
+            if (!_titleIndex.ContainsKey(title))
+                throw new MediaNotFoundException($"Item with title '{title}' not found.");
+            return _titleIndex[title];
+        }
+
+        public IEnumerable<T> FilterByYear(int year)
+        {
+            return _items.Where(m => m.YearPublished == year);
+        }
+
+        public IEnumerable<T> GetAllAvailable()
+        {
+            return _items.Where(m => m.IsAvailable);
+        }
+
+        // Дополнительные методы
+        public void Lend(string title)
+        {
+            T item = FindByTitle(title);
+            if (!item.IsAvailable)
+                throw new InvalidOperationException($"Item '{title}' is already lent out.");
+            item.IsAvailable = false;
+        }
+
+        public void Return(string title)
+        {
+            T item = FindByTitle(title);
+            if (item.IsAvailable)
+                throw new InvalidOperationException($"Item '{title}' is already available.");
+            item.IsAvailable = true;
+        }
+
+        public void PrintAll()
+        {
+            foreach (var item in _items)
+                Console.WriteLine(item.ToString());
+        }
+
+        // LINQ-запросы
+        public IEnumerable<Book> GetBooksAfterYear(int year) =>
+            _items.OfType<Book>().Where(b => b.YearPublished > year);
+
+        public IEnumerable<Movie> GetMoviesSortedByDuration() =>
+            _items.OfType<Movie>().OrderBy(m => m.Duration);
+
+        public IEnumerable<T> GetUnavailableItems() =>
+            _items.Where(m => !m.IsAvailable);
+
+        // Экспорт в CSV
+        public void ExportToCsv(string filePath)
+        {
+            using (StreamWriter writer = new StreamWriter(filePath))
+            {
+                writer.WriteLine("Type,Title,Author,YearPublished,IsAvailable");
+                foreach (var item in _items)
+                {
+                    string type = item.GetType().Name;
+                    writer.WriteLine($"{type},{Escape(item.Title)},{Escape(item.Author)},{item.YearPublished},{item.IsAvailable}");
+                }
+            }
+        }
+
+        private string Escape(string s) => s.Contains(",") ? $"\"{s}\"" : s;
+    }
+}
