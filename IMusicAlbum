@@ -1,0 +1,20 @@
+namespace MediaLibrary
+{
+    public class MusicAlbum : Media
+    {
+        public string Artist { get; set; }
+        public int TracksCount { get; set; }
+
+        public MusicAlbum(string title, string artist, int yearPublished, int tracksCount)
+            : base(title, artist, yearPublished)
+        {
+            Artist = artist;
+            TracksCount = tracksCount;
+        }
+
+        public override string ToString()
+        {
+            return base.ToString() + $", Artist: {Artist}, Tracks: {TracksCount}";
+        }
+    }
+}
