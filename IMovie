@@ -1,0 +1,20 @@
+namespace MediaLibrary
+{
+    public class Movie : Media
+    {
+        public int Duration { get; set; } // в минутах
+        public string Director { get; set; }
+
+        public Movie(string title, string director, int yearPublished, int duration)
+            : base(title, director, yearPublished) // Author = director
+        {
+            Director = director;
+            Duration = duration;
+        }
+
+        public override string ToString()
+        {
+            return base.ToString() + $", Director: {Director}, Duration: {Duration} min";
+        }
+    }
+}
