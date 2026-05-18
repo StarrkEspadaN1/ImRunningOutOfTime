@@ -1,0 +1,4 @@
+namespace MediaLibrary
+{
+    public class MovieLibrary : Library<Movie> { }
+}
