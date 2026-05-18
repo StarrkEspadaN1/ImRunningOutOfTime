@@ -1,0 +1,14 @@
+using System;
+
+namespace MediaLibrary
+{
+    public class MediaAlreadyExistsException : Exception
+    {
+        public MediaAlreadyExistsException(string message) : base(message) { }
+    }
+
+    public class MediaNotFoundException : Exception
+    {
+        public MediaNotFoundException(string message) : base(message) { }
+    }
+}
